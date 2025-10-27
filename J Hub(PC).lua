@@ -515,7 +515,7 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 end)
 
---// Hitbox Adjustment (テキスト入力版)
+--// Hitbox Adjustment (テキスト入力版・修正版)
 local hitboxValues = {
     BlockHitBox = 2,
     DiveHitBox = 2,
@@ -523,11 +523,11 @@ local hitboxValues = {
     TopHitBox = 2,
 }
 
--- プレイヤーパーツ取得
+-- プレイヤーパーツ取得（存在するまで最大5秒待つ）
 local function getPlayerPart(name)
-    local plrModel = workspace:FindFirstChild(player.Name)
+    local plrModel = workspace:WaitForChild(player.Name, 5)
     if plrModel then
-        local part = plrModel:FindFirstChild(name)
+        local part = plrModel:WaitForChild(name, 5)
         if part and part:IsA("BasePart") then
             return part
         end
@@ -571,14 +571,14 @@ local function makeHitboxInput(name, default)
         if value then
             hitboxValues[name] = value
         else
-            input.Text = tostring(hitboxValues[name]) -- 無効入力なら元の値に戻す
+            input.Text = tostring(hitboxValues[name])
         end
     end)
 
     return wrapper
 end
 
--- セクションタイトル作成（重複定義を削除）
+-- セクションタイトル作成
 local function makeSectionTitle(text)
     local wrapper = Instance.new("Frame")
     wrapper.Size = UDim2.new(1, 0, 0, 26)
@@ -622,20 +622,26 @@ end
 
 -- リアルタイム更新
 RunService.RenderStepped:Connect(function()
-    for name, value in pairs(hitboxValues) do
-        local part = getPlayerPart(name)
-        if part then
-            part.Size = Vector3.new(value, value, value)
+    local plrModel = workspace:FindFirstChild(player.Name)
+    if plrModel then
+        for name, value in pairs(hitboxValues) do
+            local part = plrModel:FindFirstChild(name)
+            if part and part:IsA("BasePart") then
+                if part.Size.X ~= value then
+                    part.Size = Vector3.new(value, value, value)
+                end
+            end
         end
     end
 end)
 
 -- リスポーン時も自動適用
 player.CharacterAdded:Connect(function()
+    local plrModel = workspace:WaitForChild(player.Name)
     task.wait(0.5)
     for name, value in pairs(hitboxValues) do
-        local part = getPlayerPart(name)
-        if part then
+        local part = plrModel:FindFirstChild(name)
+        if part and part:IsA("BasePart") then
             part.Size = Vector3.new(value, value, value)
         end
     end
