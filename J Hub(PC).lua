@@ -515,136 +515,132 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 end)
 
---// Hitbox Adjustment (テキスト入力版・修正版)
-local hitboxValues = {
-    BlockHitBox = 2,
-    DiveHitBox = 2,
-    RecHitBox = 2,
-    TopHitBox = 2,
-}
+--// Hitbox Adjustment (Text Input Version, Fixed)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
--- プレイヤーパーツ取得（存在するまで最大5秒待つ）
-local function getPlayerPart(name)
-    local plrModel = workspace:WaitForChild(player.Name, 5)
-    if plrModel then
-        local part = plrModel:WaitForChild(name, 5)
-        if part and part:IsA("BasePart") then
-            return part
-        end
-    end
-    return nil
-end
+local player = Players.LocalPlayer
+
+-- UI フレームを取得（自分のGUIに合わせて名前を変更）
+local screenGui = player:WaitForChild("PlayerGui"):WaitForChild("YourScreenGui")
+local frame = screenGui:WaitForChild("HitboxFrame")
+
+-- 初期ヒットボックス値
+local hitboxValues = {
+	BlockHitBox = 2,
+	DiveHitBox = 2,
+	RecHitBox = 2,
+	TopHitBox = 2,
+}
 
 -- 入力ボックス作成関数
 local function makeHitboxInput(name, default)
-    local wrapper = Instance.new("Frame")
-    wrapper.Size = UDim2.new(1, 0, 0, 40)
-    wrapper.BackgroundTransparency = 1
+	local wrapper = Instance.new("Frame")
+	wrapper.Size = UDim2.new(1, 0, 0, 40)
+	wrapper.BackgroundTransparency = 1
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.5, 0, 1, 0)
-    label.Position = UDim2.new(0, 5, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamMedium
-    label.TextSize = 14
-    label.TextColor3 = Color3.fromRGB(0, 255, 150)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Text = name
-    label.Parent = wrapper
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.5, 0, 1, 0)
+	label.Position = UDim2.new(0, 5, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamMedium
+	label.TextSize = 14
+	label.TextColor3 = Color3.fromRGB(0, 255, 150)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Text = name
+	label.Parent = wrapper
 
-    local input = Instance.new("TextBox")
-    input.Size = UDim2.new(0.45, 0, 0.7, 0)
-    input.Position = UDim2.new(0.5, 0, 0.15, 0)
-    input.Text = tostring(default)
-    input.ClearTextOnFocus = false
-    input.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    input.TextColor3 = Color3.fromRGB(255, 255, 255)
-    input.Font = Enum.Font.GothamMedium
-    input.TextSize = 14
-    input.TextXAlignment = Enum.TextXAlignment.Center
-    Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
-    input.Parent = wrapper
+	local input = Instance.new("TextBox")
+	input.Size = UDim2.new(0.45, 0, 0.7, 0)
+	input.Position = UDim2.new(0.5, 0, 0.15, 0)
+	input.Text = tostring(default)
+	input.ClearTextOnFocus = false
+	input.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	input.TextColor3 = Color3.fromRGB(255, 255, 255)
+	input.Font = Enum.Font.GothamMedium
+	input.TextSize = 14
+	input.TextXAlignment = Enum.TextXAlignment.Center
+	Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
+	input.Parent = wrapper
 
-    -- 入力完了時に値を更新
-    input.FocusLost:Connect(function(enterPressed)
-        local value = tonumber(input.Text)
-        if value then
-            hitboxValues[name] = value
-        else
-            input.Text = tostring(hitboxValues[name])
-        end
-    end)
+	input.FocusLost:Connect(function()
+		local value = tonumber(input.Text)
+		if value then
+			hitboxValues[name] = value
+		else
+			input.Text = tostring(hitboxValues[name])
+		end
+	end)
 
-    return wrapper
+	return wrapper
 end
 
--- セクションタイトル作成
+-- セクションタイトル作成関数
 local function makeSectionTitle(text)
-    local wrapper = Instance.new("Frame")
-    wrapper.Size = UDim2.new(1, 0, 0, 26)
-    wrapper.BackgroundTransparency = 1
+	local wrapper = Instance.new("Frame")
+	wrapper.Size = UDim2.new(1, 0, 0, 26)
+	wrapper.BackgroundTransparency = 1
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 20)
-    label.Position = UDim2.new(0.5, 0, 0, 0)
-    label.AnchorPoint = Vector2.new(0.5, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 14
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(0, 255, 150)
-    label.TextXAlignment = Enum.TextXAlignment.Center
-    label.Parent = wrapper
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 0, 20)
+	label.Position = UDim2.new(0.5, 0, 0, 0)
+	label.AnchorPoint = Vector2.new(0.5, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(0, 255, 150)
+	label.TextXAlignment = Enum.TextXAlignment.Center
+	label.Parent = wrapper
 
-    local underline = Instance.new("Frame")
-    underline.Size = UDim2.new(0.4, 0, 0, 2)
-    underline.Position = UDim2.new(0.5, 0, 1, -2)
-    underline.AnchorPoint = Vector2.new(0.5, 0)
-    underline.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
-    underline.BorderSizePixel = 0
-    underline.Parent = wrapper
+	local underline = Instance.new("Frame")
+	underline.Size = UDim2.new(0.4, 0, 0, 2)
+	underline.Position = UDim2.new(0.5, 0, 1, -2)
+	underline.AnchorPoint = Vector2.new(0.5, 0)
+	underline.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+	underline.BorderSizePixel = 0
+	underline.Parent = wrapper
 
-    return wrapper
+	return wrapper
 end
 
--- UIに追加
+-- UI に追加
 local hitboxInputs = {
-    makeSectionTitle("Hitbox Size Adjustments (Text Input)"),
-    makeHitboxInput("BlockHitBox", hitboxValues.BlockHitBox),
-    makeHitboxInput("DiveHitBox", hitboxValues.DiveHitBox),
-    makeHitboxInput("RecHitBox", hitboxValues.RecHitBox),
-    makeHitboxInput("TopHitBox", hitboxValues.TopHitBox),
+	makeSectionTitle("Hitbox Size Adjustments (Text Input)"),
+	makeHitboxInput("BlockHitBox", hitboxValues.BlockHitBox),
+	makeHitboxInput("DiveHitBox", hitboxValues.DiveHitBox),
+	makeHitboxInput("RecHitBox", hitboxValues.RecHitBox),
+	makeHitboxInput("TopHitBox", hitboxValues.TopHitBox),
 }
 
 for _, el in ipairs(hitboxInputs) do
-    el.Parent = frame
+	el.Parent = frame
 end
 
 -- リアルタイム更新
 RunService.RenderStepped:Connect(function()
-    local plrModel = workspace:FindFirstChild(player.Name)
-    if plrModel then
-        for name, value in pairs(hitboxValues) do
-            local part = plrModel:FindFirstChild(name)
-            if part and part:IsA("BasePart") then
-                if part.Size.X ~= value then
-                    part.Size = Vector3.new(value, value, value)
-                end
-            end
-        end
-    end
+	local char = player.Character
+	if char then
+		for name, value in pairs(hitboxValues) do
+			local part = char:FindFirstChild(name)
+			if part and part:IsA("BasePart") then
+				if part.Size.X ~= value then
+					part.Size = Vector3.new(value, value, value)
+				end
+			end
+		end
+	end
 end)
 
 -- リスポーン時も自動適用
-player.CharacterAdded:Connect(function()
-    local plrModel = workspace:WaitForChild(player.Name)
-    task.wait(0.5)
-    for name, value in pairs(hitboxValues) do
-        local part = plrModel:FindFirstChild(name)
-        if part and part:IsA("BasePart") then
-            part.Size = Vector3.new(value, value, value)
-        end
-    end
+player.CharacterAdded:Connect(function(char)
+	task.wait(0.5)
+	for name, value in pairs(hitboxValues) do
+		local part = char:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.Size = Vector3.new(value, value, value)
+		end
+	end
 end)
 
 print("[J Hub Hub] Hitbox input boxes loaded (real-time).")
